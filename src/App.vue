@@ -16,57 +16,7 @@
             </button>
             <label> {{ location }}</label>
           </div>
-          <div id="info">
-            <div class="wrapper-left">
-              <div id="current-weather">
-                {{ currentWeather.temp }}
-                <span>°C</span>
-              </div>
-              <div id="weather-desc">{{ currentWeather.summary }}</div>
-              <div class="temp-max-min">
-                <div class="max-desc">
-                  <div id="max-detail">
-                    <i>▲</i>
-                    {{ currentWeather.todayHighLow.todayTempHigh }}
-                    <span>°C</span>
-                  </div>
-                  <div id="max-summary">a las {{ currentWeather.todayHighLow.todayTempHighTime }}</div>
-                </div>
-                <div class="min-desc">
-                  <div id="min-detail">
-                    <i>▼</i>
-                    {{ currentWeather.todayHighLow.todayTempLow }}
-                    <span>°C</span>
-                  </div>
-                  <div id="min-summary">a las {{ currentWeather.todayHighLow.todayTempLowTime }}</div>
-                </div>
-              </div>
-            </div>
-            <div class="wrapper-right">
-              <div class="date-time-info">
-                <div id="date-desc">
-                  <img src="./assets/calendar.svg" width="20" height="20">
-                  {{ currentWeather.time }}
-                </div>
-              </div>
-              <div class="location-info">
-                <div id="location-desc">
-                  <img
-                          src="./assets/location.svg"
-                          width="10.83"
-                          height="15.83"
-                          style="opacity: 0.9;"
-                  >
-                  {{ currentWeather.full_location }}
-                  <div id="location-detail" class="mt-1">
-                    Lat: {{ currentWeather.formatted_lat }}
-                    <br>
-                    Long: {{ currentWeather.formatted_long }}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <info id="info" :currentWeather="currentWeather"></info>
         </div>
         <dashboard-content
                 class="col-md-9 col-sm-8 col-xs-12 content"
@@ -82,14 +32,14 @@
 <script>
 import Content from './components/Content';
 // import Search from './components/Search';
-// import Info from './components/Info';
+import Info from './components/Info';
 
 export default {
   name: 'app',
   props: [],
   components: {
   	//   'search': Search,
-      // 'info': Info,
+      'info': Info,
 	  'dashboard-content': Content
   },
   data() {
@@ -179,8 +129,7 @@ export default {
 
 	  // To convert temperature from fahrenheit to celcius
 	  fahToCel: function(tempInFahrenheit) {
-		  var tempInCelcius = Math.round((5 / 9) * (tempInFahrenheit - 32));
-		  return tempInCelcius;
+		  return Math.round((5 / 9) * (tempInFahrenheit - 32));
 	  },
 
 	  // To convert the air pressure reading from millibar to kilopascal
@@ -262,9 +211,9 @@ export default {
 		  var loc = this.location;
 		  var coords;
 		  var geocoder = new google.maps.Geocoder();
-		  return new Promise(function(resolve, reject) {
+		  return new Promise(function(resolve) {
 			  geocoder.geocode({ address: loc }, function(results, status) {
-				  if (status == google.maps.GeocoderStatus.OK) {
+				  if (status === google.maps.GeocoderStatus.OK) {
 					  this.lat = results[0].geometry.location.lat();
 					  this.long = results[0].geometry.location.lng();
 					  this.full_location = results[0].formatted_address;
@@ -329,12 +278,11 @@ export default {
       */
 	  fixWeatherApi: async function() {
 		  await this.setFormatCoordinates();
-		  var weatherApi =
+		  this.completeWeatherApi =
 			  'https://csm.fusioncharts.com/files/assets/wb/wb-data.php?src=darksky&lat=' +
 			  this.lat +
 			  '&long=' +
 			  this.long;
-		  this.completeWeatherApi = weatherApi;
 	  },
 
 	  fetchWeatherData: async function() {
@@ -461,8 +409,7 @@ export default {
 	  },
 
 	  getSetUVIndex: function() {
-		  var uvIndex = this.rawWeatherData.currently.uvIndex;
-		  this.highlights.uvIndex = uvIndex;
+		  this.highlights.uvIndex = this.rawWeatherData.currently.uvIndex;
 	  },
 
 	  getSetVisibility: function() {
